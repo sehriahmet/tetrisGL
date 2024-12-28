@@ -764,7 +764,7 @@ void spawnNewBlock() {
 
 // Function to check and clear rows
 void checkAndClearRows() {
-    for (int y = 1; y < GRID_SIZE; y++) { // sonra ayarla 
+    for (int y = 2; y < GRID_SIZE; y++) { // sonra ayarla 
         bool fullRow = true;
         for (int x = 0; x < GRID_SIZE; x++) {
             for (int z = 0; z < GRID_SIZE; z++) {
@@ -776,9 +776,28 @@ void checkAndClearRows() {
             if (!fullRow) break;
         }
         if (fullRow) {
-            score++;
-            background.erase(background.begin() + y);
-            background.push_back(std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
+            for(int y=1; y<4;y++){
+                for (int x=0;x<GRID_SIZE; x++) {
+                    for (int z=0; z<GRID_SIZE; z++) {
+                        score++;
+                        background[y][x][z] = 0;
+                    }
+                }
+            }
+
+            for(int y=4; y<13;y++){
+                for (int x=0;x<GRID_SIZE; x++) {
+                    for (int z=0; z<GRID_SIZE; z++) {
+                        if (background[y][x][z]) {
+                            background[y][x][z] = 0;
+                            background[y-3][x][z] = 1; 
+                        } 
+                    }
+                }
+            }
+            
+            // background.erase(background.begin() + y  );
+            // background.push_back(std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
         }
     }
 }
