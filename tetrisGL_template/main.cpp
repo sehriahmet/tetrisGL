@@ -534,9 +534,77 @@ void reshape(GLFWwindow* window, int w, int h) {
     projectionMatrix = glm::perspective(fovyRad, gWidth / (float)gHeight, 1.0f, 100.0f);
 
     // Calculate viewing matrix with camera rotation
+    // std::cout<<eyePos.x<<std::endl;
+
     glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::vec3 rotatedEyePos = glm::vec3(rotationMatrix * glm::vec4(eyePos, 1.0f));
-    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 0), glm::vec3(0, 1, 0));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+    /* alttaki kisim rotate front to right icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,4.5));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0)); // 
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
+    /* alttaki kisim rotate front to left icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
+    /* alttaki kisim rotate left to back icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,0));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
+    /* alttaki kisim rotate back to right icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
+    /* alttaki kisim rotate right to front icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,0));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
+
+    /* alttaki kisim rotate left to front icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,9));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
+    /* alttaki kisim rotate right to back icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,9));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
+    /* alttaki kisim rotate back to left icin 
+    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,4.5));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+    */
+
 
     // Set uniforms for both programs
     for (int i = 0; i < 2; ++i) {
@@ -583,7 +651,7 @@ void drawBackground() {
 // Function to draw blocks
 void drawBlocks() {
     for (int x = 0; x < GRID_SIZE; x++) {
-        for (int y = 0; y < 12; y++) {
+        for (int y = 0; y < 19; y++) {
             for (int z = 0; z < GRID_SIZE; z++) {
                 if (background[y][x][z]) {
                     glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z) * BLOCK_SIZE);
@@ -635,7 +703,7 @@ void updateBlockFall(float currentTime) {
 
 // Function to spawn a new block
 void spawnNewBlock() {
-    activeBlockPosition = glm::vec3(3, 11, 3);
+    activeBlockPosition = glm::vec3(3, 13, 3);
     if (background[activeBlockPosition.y][activeBlockPosition.x][activeBlockPosition.z]) {
         gameOver = true;
     }
