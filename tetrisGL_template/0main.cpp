@@ -29,6 +29,11 @@
 #include <glm/gtc/type_ptr.hpp> 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <deque>
+
+
+
+
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
@@ -63,7 +68,7 @@ int activeProgramIndex = 0;
 bool gameOver = 0;
 int score = 0;
 
-
+int GRID_SIZE = 9;
 
 
 
@@ -413,6 +418,19 @@ void init()
     initFonts(gWidth, gHeight);
 }
 
+void drawCube();
+
+void drawBoard() {
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int z = 0; z < GRID_SIZE; z++) {
+            glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, 0, z) * 1.0f);
+            glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
+            drawCube();
+        }
+    }
+}
+
+
 void drawCube()
 {
 	glUseProgram(gProgram[0]);
@@ -481,9 +499,65 @@ void renderText(const std::string& text, GLfloat x, GLfloat y, GLfloat scale, gl
 }
 
 
+std::deque<std::vector<std::vector<int>>> board(9, std::vector<std::vector<int>>(9, std::vector<int>(9, 0)));
 
 
+/*
+void drawBoard()
+{
+    glUseProgram(gProgram[0]);
 
+    // Assume boardWidth, boardHeight, and boardDepth are predefined dimensions of the Tetris board
+    // Assume board is a 3D array representing the state of the Tetris board, with each cell being either filled or empty
+
+    int boardWidth = 9;
+    int boardHeight = 9;
+    int boardDepth = 1;
+
+    for (int x = 0; x < boardWidth; ++x)
+    {
+        for (int y = 0; y < boardHeight; ++y)
+        {
+            for (int z = 0; z < boardDepth; ++z)
+            {
+                if (board[x][y][z] != NULL) // Check if the cell is not empty
+                {
+                    // Calculate the translation for the current cube
+                    glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+                    glm::mat4 modelMatrix = translation * modelingMatrix;
+
+                    // Set the modeling matrix for the current cube
+                    glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+                    // Draw the cube
+                    drawCube();
+                }
+            }
+        }
+    }
+
+    // Optionally, you can draw the edges of the cubes to enhance the visual effect
+    glUseProgram(gProgram[1]);
+    for (int x = 0; x < boardWidth; ++x)
+    {
+        for (int y = 0; y < boardHeight; ++y)
+        {
+            for (int z = 0; z < boardDepth; ++z)
+            {
+                if (board[x][y][z] != NULL)
+                {
+                    glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+                    glm::mat4 modelMatrix = translation * modelingMatrix;
+                    glUniformMatrix4fv(modelingMatrixLoc[1], 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+                    drawCubeEdges();
+                }
+            }
+        }
+    }
+}
+
+*/
 
 
 void display()
@@ -494,10 +568,10 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // buraya drawBoard ve diger renderlanmis kupler gelmeli 
-    
+    drawBoard();
 
     if (gameOver) {
-        renderText("Game Over", gWidth / 2 - 100, gHeight / 2, 1.0, glm::vec3(1, 0, 1));
+        renderText("Game Over!", gWidth / 2 - 100, gHeight / 2, 1.0, glm::vec3(1, 0, 1));
         renderText("Score: " + std::to_string(score), gWidth / 2 - 100, gHeight / 2 - 50, 1.0, glm::vec3(1, 1, 1));
         return;
     }
@@ -536,11 +610,31 @@ void reshape(GLFWwindow* window, int w, int h)
     }
 }
 
-void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+// Updated keyboard handling function
+void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if ((key == GLFW_KEY_Q || key == GLFW_KEY_ESCAPE) && action == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+
+    if (gameOver) return;
+
+
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        switch (key) {
+            case GLFW_KEY_A: moveBlock(-1, 0); break;
+            case GLFW_KEY_D: moveBlock(1, 0); break;
+            case GLFW_KEY_S: 
+                gameCont = true; // Start the game when 'S' is pressed
+                fallSpeed = std::max(0.1f, fallSpeed - 0.1f); 
+                break;
+            case GLFW_KEY_W: 
+                fallSpeed = std::min(1.1f, fallSpeed + 0.1f); 
+                if (fallSpeed == 1.1f) gameCont = false;
+                break;
+            case GLFW_KEY_H: cameraAngle -= 5.0f; break; // Rotate camera left
+            case GLFW_KEY_K: cameraAngle += 5.0f; break; // Rotate camera right
+        }
     }
 }
 
