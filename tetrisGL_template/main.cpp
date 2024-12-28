@@ -554,6 +554,7 @@ void rotateEyePosition() {
         // Calculate viewing matrix with camera rotation
     // std::cout<<eyePos.x<<std::endl;
 
+    
 
     if (targetCameraAngle == 90 && cameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
     // alttaki kisim rotate front to right icin 
@@ -564,6 +565,7 @@ void rotateEyePosition() {
         viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
 
         eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
+        
     }
 
     if (targetCameraAngle == -90 && cameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
@@ -656,8 +658,15 @@ void rotateEyePosition() {
     // eyePos = rotatedEyePos;
     for (int i = 0; i < 2; ++i) {
         glUseProgram(gProgram[i]);
+        lightPosLoc[i] = glGetUniformLocation(gProgram[i], "lightPos");
+        glUniform3fv(lightPosLoc[i], 1, glm::value_ptr(eyePos));
         glUniformMatrix4fv(viewingMatrixLoc[i], 1, GL_FALSE, glm::value_ptr(viewingMatrix));
     }
+    // for (int i = 0; i < 2; ++i)
+    // {
+    //     lightPosLoc[i] = glGetUniformLocation(gProgram[i], "lightPos");
+    //     glUniform3fv(lightPosLoc[i], 1, glm::value_ptr(eyePos));
+    // }
 }
 
 
