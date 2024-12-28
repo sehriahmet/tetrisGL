@@ -56,10 +56,12 @@ glm::mat4 projectionMatrix;
 glm::mat4 viewingMatrix;
 glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-0.5, -0.5, -0.5));
 // glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-100, -100, -0.5));
-glm::vec3 eyePos = glm::vec3(4.5, 4.5, 35);
-glm::vec3 lightPos = glm::vec3(4.5, 4.5, 35);
+glm::vec3 eyePos = glm::vec3(4.5, 8, 35);
+glm::vec3 lightPos = glm::vec3(4.5, 8, 35);
 
-// glm::vec3 kdGround(0.334, 0.288, 0.635); // this is the ground color in the demo
+
+bool drawingGround = false;
+glm::vec3 kdGround(0.334, 0.288, 0.635); // this is the ground color in the demo
 glm::vec3 kdCubes(0.86, 0.11, 0.31);
 
 int activeProgramIndex = 0;
@@ -307,7 +309,7 @@ void initShaders()
         glUniformMatrix4fv(modelingMatrixLoc[i], 1, GL_FALSE, glm::value_ptr(modelingMatrix));
         glUniform3fv(eyePosLoc[i], 1, glm::value_ptr(eyePos));
         glUniform3fv(lightPosLoc[i], 1, glm::value_ptr(lightPos));
-        glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdCubes));
+        glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdGround));
 	}
 }
 
@@ -676,10 +678,10 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
             case GLFW_KEY_D: moveBlock(1, 0); break;
             case GLFW_KEY_S: 
                 gameCont = true; // Start the game when 'S' is pressed
-                fallSpeed = std::max(0.1f, fallSpeed - 0.1f); 
+                fallSpeed = std::max(0.1f, fallSpeed - 0.2f); 
                 break;
             case GLFW_KEY_W: 
-                fallSpeed = std::min(1.1f, fallSpeed + 0.1f); 
+                fallSpeed = std::min(1.1f, fallSpeed + 0.2f); 
                 if (fallSpeed == 1.1f) gameCont = false;
                 break;
             case GLFW_KEY_H: cameraAngle -= 5.0f; break; // Rotate camera left
@@ -701,7 +703,7 @@ void display() {
     if (gameOver) {
         renderText("Game Over", gWidth / 2 - 100, gHeight / 2, 1.0, glm::vec3(1, 0, 0));
         renderText("Score: " + std::to_string(score), gWidth / 2 - 100, gHeight / 2 - 50, 1.0, glm::vec3(1, 1, 1));
-        return;
+        // return; 
     }
     
     // drawBackground();
@@ -709,30 +711,42 @@ void display() {
     // drawCube();
     // drawBlocks();
     // spawnNewBlock();
+
     glm::mat4 blockModelMatrix;
+    
+    drawingGround = true;
 
     for(int x = 0; x < GRID_SIZE; x++){
         for(int z = 0; z < GRID_SIZE ; z++){
-                blockModelMatrix = glm::translate(glm::mat4(1.0f), (glm::vec3(x, 0, z) ) * BLOCK_SIZE);
-                std::cout << activeBlockPosition.x << std::endl;
-                glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
-                drawCubeEdges(blockModelMatrix);
-                drawCube();  
+            for (int i=0;i<2;i++) {
+                glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdGround));
+            }
+            blockModelMatrix = glm::translate(glm::mat4(1.0f), (glm::vec3(x, 0.4f, z) ) * BLOCK_SIZE);
+            // std::cout << activeBlockPosition.x << std::endl;
+            blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(1.0f, 0.6f, 1.0f));
+            glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+            drawCubeEdges(blockModelMatrix);
+            drawCube();  
         }
     } 
-
-
+    
+    drawingGround = false;
+    for (int i=0;i<2;i++) {
+        glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdCubes));
+    }
+    // drawBlocks();
     for(int x = 0; x < 3; x++){
             for(int y = 0; y < 3 ; y++){
                 for(int z = 0; z < 3 ; z++){
                     blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x, y, z) ) * BLOCK_SIZE);
-                    std::cout << activeBlockPosition.x << std::endl;
+                    // std::cout << activeBlockPosition.x << std::endl;
                     glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
                     drawCubeEdges(blockModelMatrix);
                     drawCube();
                 }
             }
         } 
+
     //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
     // drawCube();
     //glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition ));
