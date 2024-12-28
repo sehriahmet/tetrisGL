@@ -56,8 +56,8 @@ glm::mat4 projectionMatrix;
 glm::mat4 viewingMatrix;
 glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-0.5, -0.5, -0.5));
 // glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-100, -100, -0.5));
-glm::vec3 eyePos = glm::vec3(4.5, 4.5, 24);
-glm::vec3 lightPos = glm::vec3(4.5, 4.5, 7);
+glm::vec3 eyePos = glm::vec3(4.5, 4.5, 35);
+glm::vec3 lightPos = glm::vec3(4.5, 4.5, 35);
 
 // glm::vec3 kdGround(0.334, 0.288, 0.635); // this is the ground color in the demo
 glm::vec3 kdCubes(0.86, 0.11, 0.31);
@@ -343,7 +343,20 @@ void initVBO()
         3, 2, 7, // top
         2, 6, 7, // top
         0, 4, 1, // bottom
-        4, 5, 1  // bottom
+        4, 5, 1,  // bottom
+        /* 0+8, 1+8, 2+8, // front
+        3+8, 0+8, 2+8, // front
+        4+8, 7+8, 6+8, // back
+        5+8, 4+8, 6+8, // back
+        0+8, 3+8, 4+8, // left
+        3+8, 7+8, 4+8, // left
+        2+8, 1+8, 5+8, // right
+        6+8, 2+8, 5+8, // right
+        3+8, 2+8, 7+8, // top
+        2+8, 6+8, 7+8, // top
+        0+8, 4+8, 1+8, // bottom
+        4+8, 5+8, 1+8, */
+
     };
 
     GLuint indicesLines[] = {
@@ -353,6 +366,12 @@ void initVBO()
         5, 4, 7, 6, // back
         0, 1, 2, 3, // front
         0, 3, 7, 4, // left
+        /* 15, 11, 10, 14,
+        12, 13, 9, 8,
+        10, 9, 13, 14,
+        13, 12, 15, 14,
+        8, 9, 10, 11,
+        8, 11, 15, 12, */
     };
 
     GLfloat vertexPos[] = {
@@ -364,6 +383,15 @@ void initVBO()
         1, 0, 0, // 1: bottom-right-back
         1, 1, 0, // 2: top-right-back
         0, 1, 0, // 3: top-left-back
+        /* 1, 0, 1,
+        2, 0, 1,
+        2, 1, 1,
+        1, 1, 1,
+        1, 0, 0,
+        2, 0, 0,
+        2, 1, 0,
+        1, 1, 0, */
+
     };
 
     GLfloat vertexNor[] = {
@@ -375,6 +403,14 @@ void initVBO()
          1.0,  0.0,  0.0, // 5: right
          0.0,  0.0, -1.0, // 6: back 
          0.0,  1.0,  0.0, // 7: top
+        /* 1.0,  1.0,  1.0, // 0: unused
+         0.0, -1.0,  0.0, // 1: bottom
+         0.0,  0.0,  1.0, // 2: front
+         1.0,  1.0,  1.0, // 3: unused
+        -1.0,  0.0,  0.0, // 4: left
+         1.0,  0.0,  0.0, // 5: right
+         0.0,  0.0, -1.0, // 6: back 
+         0.0,  1.0,  0.0, // 7: top */
     };
 
 	gVertexDataSizeInBytes = sizeof(vertexPos);
@@ -513,17 +549,16 @@ void reshape(GLFWwindow* window, int w, int h) {
 #include <deque>
 
 // Define constants for the grid size and block properties
-const int GRID_SIZE = 9;
+const int GRID_SIZE = 10;
 const float BLOCK_SIZE = 1.0f;
 
 // Game state variables
-std::deque<std::vector<std::vector<int>>> background(13, std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
-glm::vec3 activeBlockPosition(0, GRID_SIZE - 1, 0); // Start in the center at the top
+std::deque<std::vector<std::vector<int>>> background(19, std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
+glm::vec3 activeBlockPosition(3, 11 , 4); // Start in the center at the top
 int score = 0;
 bool gameOver = false;
 float fallSpeed = 0.5f; // Blocks fall every 0.5 seconds
 float lastFallTime = 0.0f;
-
 
 
 // Function to draw the grid (background)
@@ -559,8 +594,9 @@ void drawBlocks() {
 // Function to move the block
 void moveBlock(int dx, int dz) {
     glm::vec3 newPosition = activeBlockPosition + glm::vec3(dx, 0, dz);
-    if (newPosition.x >= 0 && newPosition.x < GRID_SIZE && newPosition.z >= 0 && newPosition.z < GRID_SIZE &&
-        background[newPosition.y][newPosition.x][newPosition.z] != 1) { // burada degistirmemiz lazim ama degistirince core dumped oluyo 
+    if (newPosition.x >= 0 && newPosition.x < GRID_SIZE - 3 && newPosition.z >= 0 && newPosition.z < GRID_SIZE - 3 &&
+        background[newPosition.y][newPosition.x][newPosition.z] != 1 && background[newPosition.y][newPosition.x + 2][newPosition.z] != 1
+        && background[newPosition.y][newPosition.x][newPosition.z + 2] != 1 && background[newPosition.y][newPosition.x + 2][newPosition.z] != 1) { // burada degistirmemiz lazim ama degistirince core dumped oluyo 
         activeBlockPosition = newPosition; 
     }
 }
@@ -574,8 +610,15 @@ void updateBlockFall(float currentTime) {
 
     if (currentTime - lastFallTime > fallSpeed) {
         glm::vec3 newPosition = activeBlockPosition + glm::vec3(0, -1, 0); 
-        if (newPosition.y < 0 || background[newPosition.y][newPosition.x][newPosition.z]) {
-            background[activeBlockPosition.y][activeBlockPosition.x][activeBlockPosition.z] = 1;
+        if (newPosition.y < 0 || background[newPosition.y][newPosition.x][newPosition.z] || background[newPosition.y][newPosition.x + 2][newPosition.z] 
+        || background[newPosition.y][newPosition.x][newPosition.z + 2] ) {
+            for(int x = 0; x < 3; x++){
+                for(int y = 0; y < 3 ; y++){
+                    for(int z = 0; z < 3 ; z++){
+                        background[activeBlockPosition.y + y][activeBlockPosition.x + x][activeBlockPosition.z + z] = 1;
+                    }
+                }
+            }
             checkAndClearRows(); // Implement row clearing
             spawnNewBlock();    // Implement block spawning
         } else {
@@ -587,7 +630,7 @@ void updateBlockFall(float currentTime) {
 
 // Function to spawn a new block
 void spawnNewBlock() {
-    activeBlockPosition = glm::vec3(4, 11, 4);
+    activeBlockPosition = glm::vec3(3, 11, 4);
     if (background[activeBlockPosition.y][activeBlockPosition.x][activeBlockPosition.z]) {
         gameOver = true;
     }
@@ -651,22 +694,34 @@ void display() {
 
     // drawCube();
     // drawCubeEdges();
-
+    
     if (gameOver) {
         renderText("Game Over", gWidth / 2 - 100, gHeight / 2, 1.0, glm::vec3(1, 0, 0));
         renderText("Score: " + std::to_string(score), gWidth / 2 - 100, gHeight / 2 - 50, 1.0, glm::vec3(1, 1, 1));
         return;
     }
-
+    
     // drawBackground();
     drawBlocks();
     // drawCube();
     // drawBlocks();
     // spawnNewBlock();
-    glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition - glm::vec3(0, 0, 0) ) * BLOCK_SIZE);
-    glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+    glm::mat4 blockModelMatrix;
+    for(int x = 0; x < 3; x++){
+                for(int y = 0; y < 3 ; y++){
+                    for(int z = 0; z < 3 ; z++){
+                        blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x, y, z) ) * BLOCK_SIZE);
+                        std::cout << activeBlockPosition.x << std::endl;
+                        glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+                        drawCube();
+                    }
+                }
+            } 
+    //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
     // drawCube();
-
+    //glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition ));
+    //blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
+    //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
     renderText("Point: " + std::to_string(score), gWidth - 150, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
 }
 
@@ -687,6 +742,7 @@ void mainLoop(GLFWwindow* window) {
 
 int main(int argc, char** argv)   // Create Main Function For Bringing It All Together
 {
+    
     GLFWwindow* window;
     if (!glfwInit())
     {
@@ -722,7 +778,7 @@ int main(int argc, char** argv)   // Create Main Function For Bringing It All To
     glfwSetWindowTitle(window, rendererInfo);
 
     init();
-
+    
     glfwSetKeyCallback(window, keyboard);
     glfwSetWindowSizeCallback(window, reshape);
 
