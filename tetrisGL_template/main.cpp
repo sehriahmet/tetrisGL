@@ -843,6 +843,8 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
                 if (fallSpeed == 1.1f) gameCont = false;
                 break;
             case GLFW_KEY_H: 
+                renderText("H", 30.0f, 50.0f, 1, glm::vec3(1.0f, 0, 0)); // bunun sabiot durmasi lazim 
+
                 targetCameraAngle = -90; 
                 std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
                 rotateEyePosition();
@@ -853,6 +855,7 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
                 std::cout<<"after camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<"\n"<<std::endl;
                 break;
             case GLFW_KEY_K: 
+                renderText("K", 30.0f, 50.0f,1.5, glm::vec3(1.0f, 0, 0)); // bunun da sabit durmasi lazim 
                 targetCameraAngle = 90; 
                 std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
                 rotateEyePosition();
@@ -928,7 +931,12 @@ void display() {
     //glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition ));
     //blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
     //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+    if (cameraAngle == 0) renderText("Front", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
+    else if (cameraAngle == 90) renderText("Right", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
+    else if (cameraAngle == -90) renderText("Left", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
+    else if (cameraAngle == 180) renderText("Back", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
     renderText("Point: " + std::to_string(score), gWidth - 150, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
+
 }
 
 void mainLoop(GLFWwindow* window) {
