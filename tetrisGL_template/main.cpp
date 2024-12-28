@@ -536,7 +536,7 @@ void reshape(GLFWwindow* window, int w, int h) {
     // Calculate viewing matrix with camera rotation
     // std::cout<<eyePos.x<<std::endl;
     if (targetCameraAngle == 0 && eyePos == glm::vec3(4.5f,8.0f,35.0f)) {
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::vec3 rotatedEyePos = glm::vec3(rotationMatrix * glm::vec4(eyePos, 1.0f));
         viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
     }
@@ -549,89 +549,111 @@ void reshape(GLFWwindow* window, int w, int h) {
     }
 }
 
-void rotate() {
+void rotateEyePosition() {
 
         // Calculate viewing matrix with camera rotation
     // std::cout<<eyePos.x<<std::endl;
 
 
-    if (targetCameraAngle == 90 && eyePos == glm::vec3(4.5f,8.0f,35.0f)) {
+    if (targetCameraAngle == 90 && cameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
     // alttaki kisim rotate front to right icin 
         glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
         glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,4.5));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0)); // 
+        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0)); // 
         glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
         viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-    
+
+        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
     }
 
-    if (targetCameraAngle == -90 && eyePos == glm::vec3(4.5f,8.0f,35.0f)) {
+    if (targetCameraAngle == -90 && cameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
     // alttaki kisim rotate front to left icin 
-    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
-    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
-    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+        std::cout<<"front to left"<<std::endl;
+        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
+        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
+        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
+        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
     
     }
 
-    if (targetCameraAngle == -90 && eyePos == glm::vec3(-26.0f,8.0f,4.5f)) {
+    if (targetCameraAngle == -90 && cameraAngle == -90 ) { // && eyePos == glm::vec3(-26.0f,8.0f,4.5f)
     // alttaki kisim rotate left to back icin 
     glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
     glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,0));
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
     glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
     viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+    eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
     }
 
 
-    if (targetCameraAngle == 90 && eyePos == glm::vec3(4.5f,8.0f,-26.0f)) {
+    if (targetCameraAngle == 90 && cameraAngle == 180) { //  && eyePos == glm::vec3(4.5f,8.0f,-26.0f)
     // alttaki kisim rotate back to right icin 
-    glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
-    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
-    glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+        std::cout<<"back to right"<<std::endl;
+        std::cout<<eyePos.x<<"  "<< eyePos.y<< "  "<<eyePos.z<< std::endl;
+        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
+        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,4.5));
+        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
+        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
+        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
     }
 
-    if (targetCameraAngle == -90 && eyePos == glm::vec3(35.0f,8.0f,4.5f)) {
+    if (targetCameraAngle == -90 && cameraAngle == 90) { // && eyePos == glm::vec3(35.0f,8.0f,4.5f)
     // alttaki kisim rotate right to front icin 
     glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
     glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,0));
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle-90), glm::vec3(0, 1.0f, 0));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
     glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
     viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+    eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
     }
 
-    if (targetCameraAngle == 90 && eyePos == glm::vec3(-26.0f,8.0f,4.5f)) {
+    if (targetCameraAngle == 90 && cameraAngle == -90) { // && eyePos == glm::vec3(-26.0f,8.0f,4.5f)
     // alttaki kisim rotate left to front icin 
     glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
     glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,9));
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
     glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
     viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+    eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
     }
 
-    if (targetCameraAngle == 90 && eyePos == glm::vec3(35.0f,8.0f,4.5f)) {
+    if (targetCameraAngle == 90 && cameraAngle == 90 ) { // && eyePos == glm::vec3(35.0f,8.0f,4.5f)
     // alttaki kisim rotate right to back icin 
+    std::cout<<"right to back"<<std::endl;
     glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
     glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,9));
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
     glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
     viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+    eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
     }
 
 
-    if (targetCameraAngle == 90 && eyePos == glm::vec3(4.5f,8.0f,-26.0f)) {
+    if (targetCameraAngle == -90 && cameraAngle == 180) { // && eyePos == glm::vec3(4.5f,8.0f,-26.0f) 
     // alttaki kisim rotate back to left icin 
+    std::cout<<eyePos.x<<"  "<< eyePos.y<< "  "<<eyePos.z<< std::endl;
+
+    std::cout<<"back to left"<<std::endl;
     glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
-    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,4.5));
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraAngle+90), glm::vec3(0, 1.0f, 0));
+    glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
     glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
     viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+
+    eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir.     
     }
 
-
+    // eyePos = rotatedEyePos;
     for (int i = 0; i < 2; ++i) {
         glUseProgram(gProgram[i]);
         glUniformMatrix4fv(viewingMatrixLoc[i], 1, GL_FALSE, glm::value_ptr(viewingMatrix));
@@ -776,14 +798,24 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
                 break;
             case GLFW_KEY_H: 
                 targetCameraAngle = -90; 
-                
-                rotate();
-                break; // Rotate camera left
+                std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
+                rotateEyePosition();
+                if (cameraAngle == -90) { cameraAngle = 180.0f; }
+                else if (cameraAngle == 0) cameraAngle = -90.0f;
+                else if (cameraAngle == 90) cameraAngle = 0.0f;
+                else if (cameraAngle == 180) cameraAngle = 90.0f;
+                std::cout<<"after camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<"\n"<<std::endl;
+                break;
             case GLFW_KEY_K: 
                 targetCameraAngle = 90; 
-                
-                rotate();
-                break; // Rotate camera left
+                std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
+                rotateEyePosition();
+                if (cameraAngle == -90) { cameraAngle = 0.0f; }
+                else if (cameraAngle == 0) cameraAngle = 90.0f;
+                else if (cameraAngle == 90) cameraAngle = 180.0f;
+                else if (cameraAngle == 180) cameraAngle = -90.0f;
+                std::cout<<"after camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<"\n"<<std::endl;
+                break;
         }
     }
 }
@@ -858,7 +890,7 @@ void mainLoop(GLFWwindow* window) {
         float currentTime = glfwGetTime();
 
         // Smoothly interpolatebackground camera angle
-        cameraAngle = glm::mix(cameraAngle, targetCameraAngle, 0.1f);
+        // cameraAngle = glm::mix(cameraAngle, targetCameraAngle, 0.1f);
 
         updateBlockFall(currentTime);
         display();
