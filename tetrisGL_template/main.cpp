@@ -452,16 +452,19 @@ void drawCube()
     // drawCubeEdges();
 }
 
-void drawCubeEdges()
-{
-    glColor3b(0,0,0);
+
+void drawCubeEdges(const glm::mat4& modelMatrix) {
+    glUseProgram(gProgram[1]); // Use the edge-drawing shader program
+
+    // Set the model matrix uniform for edge drawing
+    glUniformMatrix4fv(modelingMatrixLoc[1], 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    // Set the color and line width
     glLineWidth(3);
 
-	glUseProgram(gProgram[1]);
-
-    for (int i = 0; i < 6; ++i)
-    {
-	    glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(gTriangleIndexDataSizeInBytes + i * 4 * sizeof(GLuint)));
+    // Draw edges for each face of the cube
+    for (int i = 0; i < 6; ++i) {
+        glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(gTriangleIndexDataSizeInBytes + i * 4 * sizeof(GLuint)));
     }
 }
 
@@ -549,12 +552,12 @@ void reshape(GLFWwindow* window, int w, int h) {
 #include <deque>
 
 // Define constants for the grid size and block properties
-const int GRID_SIZE = 10;
+const int GRID_SIZE = 9;
 const float BLOCK_SIZE = 1.0f;
 
 // Game state variables
 std::deque<std::vector<std::vector<int>>> background(19, std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
-glm::vec3 activeBlockPosition(3, 11 , 4); // Start in the center at the top
+glm::vec3 activeBlockPosition(3, 11 , 3); // Start in the center at the top
 int score = 0;
 bool gameOver = false;
 float fallSpeed = 0.5f; // Blocks fall every 0.5 seconds
@@ -583,7 +586,7 @@ void drawBlocks() {
                 if (background[y][x][z]) {
                     glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z) * BLOCK_SIZE);
                     glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
-                    drawCubeEdges();
+                    drawCubeEdges(modelMatrix);
                     drawCube();
                 }
             }
@@ -594,7 +597,7 @@ void drawBlocks() {
 // Function to move the block
 void moveBlock(int dx, int dz) {
     glm::vec3 newPosition = activeBlockPosition + glm::vec3(dx, 0, dz);
-    if (newPosition.x >= 0 && newPosition.x < GRID_SIZE - 3 && newPosition.z >= 0 && newPosition.z < GRID_SIZE - 3 &&
+    if (newPosition.x >= 0 && newPosition.x < GRID_SIZE - 2 && newPosition.z >= 0 && newPosition.z < GRID_SIZE - 2 &&
         background[newPosition.y][newPosition.x][newPosition.z] != 1 && background[newPosition.y][newPosition.x + 2][newPosition.z] != 1
         && background[newPosition.y][newPosition.x][newPosition.z + 2] != 1 && background[newPosition.y][newPosition.x + 2][newPosition.z] != 1) { // burada degistirmemiz lazim ama degistirince core dumped oluyo 
         activeBlockPosition = newPosition; 
@@ -610,7 +613,7 @@ void updateBlockFall(float currentTime) {
 
     if (currentTime - lastFallTime > fallSpeed) {
         glm::vec3 newPosition = activeBlockPosition + glm::vec3(0, -1, 0); 
-        if (newPosition.y < 0 || background[newPosition.y][newPosition.x][newPosition.z] || background[newPosition.y][newPosition.x + 2][newPosition.z] 
+        if (newPosition.y < 1 || background[newPosition.y][newPosition.x][newPosition.z] || background[newPosition.y][newPosition.x + 2][newPosition.z] 
         || background[newPosition.y][newPosition.x][newPosition.z + 2] ) {
             for(int x = 0; x < 3; x++){
                 for(int y = 0; y < 3 ; y++){
@@ -630,7 +633,7 @@ void updateBlockFall(float currentTime) {
 
 // Function to spawn a new block
 void spawnNewBlock() {
-    activeBlockPosition = glm::vec3(3, 11, 4);
+    activeBlockPosition = glm::vec3(3, 11, 3);
     if (background[activeBlockPosition.y][activeBlockPosition.x][activeBlockPosition.z]) {
         gameOver = true;
     }
@@ -638,7 +641,7 @@ void spawnNewBlock() {
 
 // Function to check and clear rows
 void checkAndClearRows() {
-    for (int y = 0; y < GRID_SIZE; y++) {
+    for (int y = 1; y < GRID_SIZE; y++) { // sonra ayarla 
         bool fullRow = true;
         for (int x = 0; x < GRID_SIZE; x++) {
             for (int z = 0; z < GRID_SIZE; z++) {
@@ -707,16 +710,29 @@ void display() {
     // drawBlocks();
     // spawnNewBlock();
     glm::mat4 blockModelMatrix;
+
+    for(int x = 0; x < GRID_SIZE; x++){
+        for(int z = 0; z < GRID_SIZE ; z++){
+                blockModelMatrix = glm::translate(glm::mat4(1.0f), (glm::vec3(x, 0, z) ) * BLOCK_SIZE);
+                std::cout << activeBlockPosition.x << std::endl;
+                glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+                drawCubeEdges(blockModelMatrix);
+                drawCube();  
+        }
+    } 
+
+
     for(int x = 0; x < 3; x++){
-                for(int y = 0; y < 3 ; y++){
-                    for(int z = 0; z < 3 ; z++){
-                        blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x, y, z) ) * BLOCK_SIZE);
-                        std::cout << activeBlockPosition.x << std::endl;
-                        glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
-                        drawCube();
-                    }
+            for(int y = 0; y < 3 ; y++){
+                for(int z = 0; z < 3 ; z++){
+                    blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x, y, z) ) * BLOCK_SIZE);
+                    std::cout << activeBlockPosition.x << std::endl;
+                    glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+                    drawCubeEdges(blockModelMatrix);
+                    drawCube();
                 }
-            } 
+            }
+        } 
     //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
     // drawCube();
     //glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition ));
