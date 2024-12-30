@@ -880,8 +880,8 @@ void display() {
     // drawCubeEdges();
     
     if (gameOver) {
-        renderText("Game Over", gWidth / 2 - 100, gHeight / 2, 1.0, glm::vec3(1, 0, 0));
-        renderText("Score: " + std::to_string(score), gWidth / 2 - 100, gHeight / 2 - 50, 1.0, glm::vec3(1, 1, 1));
+        renderText("Game Over!", gWidth / 2 - 200, gHeight / 2, 1.5, glm::vec3(0.92, 0.20, 0.63));
+        renderText("Score " + std::to_string(score), gWidth / 2 - 100, gHeight / 2 - 50, 1.0, glm::vec3(0.51, 0.20, 0.92));
         // return; 
     }
     
