@@ -56,8 +56,8 @@ glm::mat4 projectionMatrix;
 glm::mat4 viewingMatrix;
 glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-0.5, -0.5, -0.5));
 // glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-100, -100, -0.5));
-glm::vec3 eyePos = glm::vec3(4.5, 8, 35);
-glm::vec3 lightPos = glm::vec3(4.5, 8, 35);
+glm::vec3 eyePos = glm::vec3(0, 8, 32);
+glm::vec3 lightPos = glm::vec3(0, 8, 32);
 
 
 bool drawingGround = false;
@@ -535,10 +535,10 @@ void reshape(GLFWwindow* window, int w, int h) {
 
     // Calculate viewing matrix with camera rotation
     // std::cout<<eyePos.x<<std::endl;
-    if (targetCameraAngle == 0 && eyePos == glm::vec3(4.5f,8.0f,35.0f)) {
+    if (targetCameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
         glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::vec3 rotatedEyePos = glm::vec3(rotationMatrix * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
+        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(0, 4.5, 0), glm::vec3(0, 1, 0));
     }
 
     // Set uniforms for both programs
@@ -550,123 +550,18 @@ void reshape(GLFWwindow* window, int w, int h) {
 }
 
 void rotateEyePosition() {
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
+    glm::vec3 rotatedEyePos = glm::vec3(rotationMatrix * glm::vec4(eyePos, 1.0f));
+    viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(0, 4.5, 0), glm::vec3(0, 1, 0));
+    eyePos = rotatedEyePos;
 
-        // Calculate viewing matrix with camera rotation
-    // std::cout<<eyePos.x<<std::endl;
-
-    
-
-    if (targetCameraAngle == 90 && cameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
-    // alttaki kisim rotate front to right icin 
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,4.5));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0)); // 
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
-        
-    }
-
-    if (targetCameraAngle == -90 && cameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
-    // alttaki kisim rotate front to left icin 
-        std::cout<<"front to left"<<std::endl;
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
-    
-    }
-
-    if (targetCameraAngle == -90 && cameraAngle == -90 ) { // && eyePos == glm::vec3(-26.0f,8.0f,4.5f)
-    // alttaki kisim rotate left to back icin 
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,0));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
-    }
-
-
-    if (targetCameraAngle == 90 && cameraAngle == 180) { //  && eyePos == glm::vec3(4.5f,8.0f,-26.0f)
-    // alttaki kisim rotate back to right icin 
-        std::cout<<"back to right"<<std::endl;
-        std::cout<<eyePos.x<<"  "<< eyePos.y<< "  "<<eyePos.z<< std::endl;
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,4.5));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
-    }
-
-    if (targetCameraAngle == -90 && cameraAngle == 90) { // && eyePos == glm::vec3(35.0f,8.0f,4.5f)
-    // alttaki kisim rotate right to front icin 
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,0));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
-    }
-
-    if (targetCameraAngle == 90 && cameraAngle == -90) { // && eyePos == glm::vec3(-26.0f,8.0f,4.5f)
-    // alttaki kisim rotate left to front icin 
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,9));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
-    }
-
-    if (targetCameraAngle == 90 && cameraAngle == 90 ) { // && eyePos == glm::vec3(35.0f,8.0f,4.5f)
-    // alttaki kisim rotate right to back icin 
-        std::cout<<"right to back"<<std::endl;
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-4.5));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(4.5,0,9));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir. 
-    }
-
-
-    if (targetCameraAngle == -90 && cameraAngle == 180) { // && eyePos == glm::vec3(4.5f,8.0f,-26.0f) 
-    // alttaki kisim rotate back to left icin 
-        std::cout<<eyePos.x<<"  "<< eyePos.y<< "  "<<eyePos.z<< std::endl;
-
-        std::cout<<"back to left"<<std::endl;
-        glm::mat4 T1 = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5,0,0));
-        glm::mat4 T2 = glm::translate(glm::mat4(1.0f), glm::vec3(9,0,4.5));
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
-        glm::vec3 rotatedEyePos = glm::vec3(T2*rotationMatrix*T1 * glm::vec4(eyePos, 1.0f));
-        viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(4.5, 4.5, 4.5), glm::vec3(0, 1, 0));
-
-        eyePos = rotatedEyePos; // bu ilerleyen zamanda silinebilir.     
-    }
-
-    // eyePos = rotatedEyePos;
     for (int i = 0; i < 2; ++i) {
         glUseProgram(gProgram[i]);
         lightPosLoc[i] = glGetUniformLocation(gProgram[i], "lightPos");
         glUniform3fv(lightPosLoc[i], 1, glm::value_ptr(eyePos));
         glUniformMatrix4fv(viewingMatrixLoc[i], 1, GL_FALSE, glm::value_ptr(viewingMatrix));
     }
-    // for (int i = 0; i < 2; ++i)
-    // {
-    //     lightPosLoc[i] = glGetUniformLocation(gProgram[i], "lightPos");
-    //     glUniform3fv(lightPosLoc[i], 1, glm::value_ptr(eyePos));
-    // }
+
 }
 
 
@@ -687,27 +582,13 @@ float fallSpeed = 0.5f; // Blocks fall every 0.5 seconds
 float lastFallTime = 0.0f;
 
 
-// Function to draw the grid (background)
-void drawBackground() {
-    for (int x = 0; x < GRID_SIZE; x++) {
-        for (int z = 0; z < GRID_SIZE; z++) {
-            glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, 0, z) * BLOCK_SIZE);
-            glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
-            // drawCube();
-        }
-    }
-}
-
-
-
 // bu fonksiyon kup dustukten sonra yerinde ciziyo 
-// Function to draw blocks
 void drawBlocks() {
     for (int x = 0; x < GRID_SIZE; x++) {
         for (int y = 0; y < 19; y++) {
             for (int z = 0; z < GRID_SIZE; z++) {
                 if (background[y][x][z]) {
-                    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z) * BLOCK_SIZE);
+                    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x-4.5, y, z-4.5) * BLOCK_SIZE);
                     glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
                     drawCubeEdges(modelMatrix);
                     drawCube();
@@ -885,8 +766,9 @@ void display() {
         // return; 
     }
     
-    // drawBackground();
+    // bura yerdeki bloklari ciziyo
     drawBlocks();
+
     // drawCube();
     // drawBlocks();
     // spawnNewBlock();
@@ -895,12 +777,13 @@ void display() {
     
     drawingGround = true;
 
+    // bura zemini ciziyo
     for(int x = 0; x < GRID_SIZE; x++){
         for(int z = 0; z < GRID_SIZE ; z++){
             for (int i=0;i<2;i++) {
                 glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdGround));
             }
-            blockModelMatrix = glm::translate(glm::mat4(1.0f), (glm::vec3(x, 0.4f, z) ) * BLOCK_SIZE);
+            blockModelMatrix = glm::translate(glm::mat4(1.0f), (glm::vec3(x-4.5, 0.4f, z-4.5) ) * BLOCK_SIZE);
             // std::cout << activeBlockPosition.x << std::endl;
             blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(1.0f, 0.6f, 1.0f));
             glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
@@ -917,7 +800,7 @@ void display() {
     for(int x = 0; x < 3; x++){
             for(int y = 0; y < 3 ; y++){
                 for(int z = 0; z < 3 ; z++){
-                    blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x, y, z) ) * BLOCK_SIZE);
+                    blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x-4.5, y, z-4.5) ) * BLOCK_SIZE);
                     // std::cout << activeBlockPosition.x << std::endl;
                     glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
                     drawCubeEdges(blockModelMatrix);
