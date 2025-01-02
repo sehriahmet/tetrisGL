@@ -66,8 +66,6 @@ glm::vec3 lightPos = glm::vec3(0, 9, 32);
 glm::vec3 kdGround(0.334, 0.288, 0.635); // this is the ground color in the demo
 glm::vec3 kdCubes(0.86, 0.11, 0.31);
 
-
-
 bool isRotating = false; 
 float currentRotationTime = 0.0f; 
 const float rotationDuration = 0.3f; // bura hizlandirilabilir. 
@@ -455,12 +453,14 @@ void init()
     initVBO();
     initFonts(gWidth, gHeight);
 }
-void drawCubeEdges();
-void drawCube()
-{
-	glUseProgram(gProgram[0]);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    // drawCubeEdges();
+
+void drawCube(const glm::mat4& modelMatrix, glm::vec3 colorOfTheCube) {
+    glUseProgram(gProgram[0]); 
+
+    glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform3fv(kdLoc[0], 1, glm::value_ptr(colorOfTheCube));
+
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
 
@@ -605,7 +605,6 @@ void rotateEyePosition(float deltaTime) {
 }
 
 const int GRID_SIZE = 9;
-const float BLOCK_SIZE = 1.0f;
 
 std::deque<std::vector<std::vector<int>>> background(19, std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
 glm::vec3 activeBlockPosition(3, 11 , 3); 
@@ -621,11 +620,11 @@ void drawBlocks() {
         for (int y = 0; y < 19; y++) {
             for (int z = 0; z < GRID_SIZE; z++) {
                 if (background[y][x][z]) {
-                    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x-4.5, y, z-4.5) * BLOCK_SIZE);
+                    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x-4.5, y, z-4.5));
                     // std::cout << "Drawing block at: (" << x << ", " << y << ", " << z << ")\n";
                     glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
                     drawCubeEdges(modelMatrix);
-                    drawCube();
+                    drawCube(modelMatrix, kdCubes);
                 }
             }
         }
@@ -634,11 +633,23 @@ void drawBlocks() {
 
 void moveBlock(int dx, int dz) {
     glm::vec3 newPosition = activeBlockPosition + glm::vec3(dx, 0, dz);
-    if (newPosition.x >= 0 && newPosition.x < GRID_SIZE - 2 && newPosition.z >= 0 && newPosition.z < GRID_SIZE - 2 &&
-        background[newPosition.y][newPosition.x][newPosition.z] != 1 && background[newPosition.y][newPosition.x + 2][newPosition.z] != 1
-        && background[newPosition.y][newPosition.x][newPosition.z + 2] != 1 && background[newPosition.y][newPosition.x + 2][newPosition.z] != 1) { // burada degistirmemiz lazim ama degistirince core dumped oluyo 
-        activeBlockPosition = newPosition; 
+
+    if (newPosition.x < 0 || newPosition.x + 2 >= GRID_SIZE ||
+        newPosition.z < 0 || newPosition.z + 2 >= GRID_SIZE) {
+        return; 
     }
+
+    for (int x = 0; x < 3; x++) {
+        for (int y = 0; y < 3; y++) {
+            for (int z = 0; z < 3; z++) {
+                if (background[(int)newPosition.y + y][(int)newPosition.x + x][(int)newPosition.z + z] == 1) {
+                    return; 
+                }
+            }
+        }
+    }
+
+    activeBlockPosition = newPosition;
 }
 
 bool gameCont = false; 
@@ -667,9 +678,11 @@ void updateBlockFall(float currentTime) {
 }
 
 void spawnNewBlock() {
-    activeBlockPosition = glm::vec3(3, 13, 3);
-    if (background[activeBlockPosition.y][activeBlockPosition.x][activeBlockPosition.z]) {
+    
+    if (background[13][3][3]) {
         gameOver = true;
+    } else {
+        activeBlockPosition = glm::vec3(3, 13, 3);
     }
 }
 
@@ -807,55 +820,40 @@ void display() {
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    // drawCube();
-    // drawCubeEdges();
-    
+    glm::mat4 blockModelMatrix;
+
+    // bura zemini ciziyo
+    for(int x = 0; x < GRID_SIZE; x++){
+        for(int z = 0; z < GRID_SIZE ; z++){
+
+            blockModelMatrix = glm::translate(glm::mat4(1.0f), (glm::vec3(x-4.5, 0.4f, z-4.5) ));
+            // std::cout << activeBlockPosition.x << std::endl;
+            // std::cout<<x << "  "<<z<<std::endl;
+            blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(1.0f, 0.6f, 1.0f));
+            glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+            drawCubeEdges(blockModelMatrix);
+            drawCube(blockModelMatrix, kdGround);  
+        }
+    } 
+
     if (gameOver) {
         renderText("Game Over!", 100, 500, 1.5, glm::vec3(0.92, 0.20, 0.63));
         renderText("Score " + std::to_string(score), 200, 450, 1.0, glm::vec3(0.51, 0.20, 0.92));
         // return; 
     }
-    
+
+
     // bura yerdeki bloklari ciziyo
     drawBlocks();
-
-    if (glfwGetTime() < textDisplayTime) {
-        renderText(activeText, textX, textY, textSize, textColor);
-    }
-
-    // drawCube();
-    // drawBlocks();
-    // spawnNewBlock();
-
-    glm::mat4 blockModelMatrix;
     
-    // bura zemini ciziyo
-    for(int x = 0; x < GRID_SIZE; x++){
-        for(int z = 0; z < GRID_SIZE ; z++){
-            for (int i=0;i<2;i++) {
-                glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdGround));
-            }
-            blockModelMatrix = glm::translate(glm::mat4(1.0f), (glm::vec3(x-4.5, 0.4f, z-4.5) ) * BLOCK_SIZE);
-            // std::cout << activeBlockPosition.x << std::endl;
-            blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(1.0f, 0.6f, 1.0f));
-            glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
-            drawCubeEdges(blockModelMatrix);
-            drawCube();  
-        }
-    } 
-    
-    for (int i=0;i<2;i++) {
-        glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdCubes));
-    }
-    // drawBlocks();
     for(int x = 0; x < 3; x++){
         for(int y = 0; y < 3 ; y++){
             for(int z = 0; z < 3 ; z++){
-                blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x-4.5, y, z-4.5) ) * BLOCK_SIZE);
+                blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x-4.5, y, z-4.5) ));
                 // std::cout << activeBlockPosition.x << std::endl;
                 glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
                 drawCubeEdges(blockModelMatrix);
-                drawCube();
+                drawCube(blockModelMatrix, kdCubes);
             }
         }
     } 
@@ -873,6 +871,10 @@ void display() {
     if (score<100000) renderText("Point: " + std::to_string(score), 450, 950, 0.50, glm::vec3(0, 1, 1));
     else renderText("Point: " + std::to_string(score), 400, 950, 0.50, glm::vec3(0, 1, 1));
 
+    if (glfwGetTime() < textDisplayTime) {
+        renderText(activeText, textX, textY, textSize, textColor);
+    }
+
 }
 
 void mainLoop(GLFWwindow* window) {
@@ -885,8 +887,8 @@ void mainLoop(GLFWwindow* window) {
 
         rotateEyePosition(deltaTime);
 
-        updateBlockFall(currentTime);
         display();
+        updateBlockFall(currentTime);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
