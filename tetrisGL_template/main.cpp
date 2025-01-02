@@ -30,6 +30,9 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <deque>
+
+
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 using namespace std;
@@ -56,11 +59,10 @@ glm::mat4 projectionMatrix;
 glm::mat4 viewingMatrix;
 glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-0.5, -0.5, -0.5));
 // glm::mat4 modelingMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-100, -100, -0.5));
-glm::vec3 eyePos = glm::vec3(0, 8, 32);
-glm::vec3 lightPos = glm::vec3(0, 8, 32);
+glm::vec3 eyePos = glm::vec3(0, 9, 32);
+glm::vec3 lightPos = glm::vec3(0, 9, 32);
 
 
-bool drawingGround = false;
 glm::vec3 kdGround(0.334, 0.288, 0.635); // this is the ground color in the demo
 glm::vec3 kdCubes(0.86, 0.11, 0.31);
 
@@ -68,7 +70,7 @@ glm::vec3 kdCubes(0.86, 0.11, 0.31);
 
 bool isRotating = false; 
 float currentRotationTime = 0.0f; 
-const float rotationDuration = 1.0f; // bura hizlandirilabilir. 
+const float rotationDuration = 0.3f; // bura hizlandirilabilir. 
 
 
 int activeProgramIndex = 0;
@@ -465,7 +467,6 @@ void drawCube()
 void drawCubeEdges(const glm::mat4& modelMatrix) {
     glUseProgram(gProgram[1]); // Use the edge-drawing shader program
 
-    // Set the model matrix uniform for edge drawing
     glUniformMatrix4fv(modelingMatrixLoc[1], 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
     // Set the color and line width
@@ -540,7 +541,6 @@ void reshape(GLFWwindow* window, int w, int h) {
     float fovyRad = (float)(45.0 / 180.0) * M_PI;
     projectionMatrix = glm::perspective(fovyRad, gWidth / (float)gHeight, 1.0f, 100.0f);
 
-    // Calculate viewing matrix with camera rotation
     // std::cout<<eyePos.x<<std::endl;
     if (targetCameraAngle == 0) { // && eyePos == glm::vec3(4.5f,8.0f,35.0f)
         glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -548,7 +548,6 @@ void reshape(GLFWwindow* window, int w, int h) {
         viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(0, 4.5, 0), glm::vec3(0, 1, 0));
     }
 
-    // Set uniforms for both programs
     for (int i = 0; i < 2; ++i) {
         glUseProgram(gProgram[i]);
         glUniformMatrix4fv(projectionMatrixLoc[i], 1, GL_FALSE, glm::value_ptr(projectionMatrix));
@@ -585,7 +584,7 @@ void rotateEyePosition(float deltaTime) {
 
     if (t >= 1.0f) {
         isRotating = false;
-        currentRotationTime = 0.0f; // Reset for next rotation
+        currentRotationTime = 0.0f; 
         eyePos = rotatedEyePos;
         // startCameraAngle = targetCameraAngle; // Set new start angle
 
@@ -605,21 +604,14 @@ void rotateEyePosition(float deltaTime) {
     }
 }
 
-
-
-// Include additional libraries for game logic
-#include <deque>
-
-// Define constants for the grid size and block properties
 const int GRID_SIZE = 9;
 const float BLOCK_SIZE = 1.0f;
 
-// Game state variables
 std::deque<std::vector<std::vector<int>>> background(19, std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
-glm::vec3 activeBlockPosition(3, 11 , 3); // Start in the center at the top
+glm::vec3 activeBlockPosition(3, 11 , 3); 
 int score = 0;
 bool gameOver = false;
-float fallSpeed = 0.5f; // Blocks fall every 0.5 seconds
+float fallSpeed = 0.5f; 
 float lastFallTime = 0.0f;
 
 
@@ -630,6 +622,7 @@ void drawBlocks() {
             for (int z = 0; z < GRID_SIZE; z++) {
                 if (background[y][x][z]) {
                     glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x-4.5, y, z-4.5) * BLOCK_SIZE);
+                    // std::cout << "Drawing block at: (" << x << ", " << y << ", " << z << ")\n";
                     glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(modelMatrix));
                     drawCubeEdges(modelMatrix);
                     drawCube();
@@ -639,7 +632,6 @@ void drawBlocks() {
     }
 }
 
-// Function to move the block
 void moveBlock(int dx, int dz) {
     glm::vec3 newPosition = activeBlockPosition + glm::vec3(dx, 0, dz);
     if (newPosition.x >= 0 && newPosition.x < GRID_SIZE - 2 && newPosition.z >= 0 && newPosition.z < GRID_SIZE - 2 &&
@@ -649,12 +641,10 @@ void moveBlock(int dx, int dz) {
     }
 }
 
-// Additional flag for game start
-bool gameCont = false; // The game starts only after pressing 'S'
+bool gameCont = false; 
 
-// Updated block falling logic
 void updateBlockFall(float currentTime) {
-    if (!gameCont) return; // Do not update the block if the game hasn't started
+    if (!gameCont) return; 
 
     if (currentTime - lastFallTime > fallSpeed) {
         glm::vec3 newPosition = activeBlockPosition + glm::vec3(0, -1, 0); 
@@ -667,8 +657,8 @@ void updateBlockFall(float currentTime) {
                     }
                 }
             }
-            checkAndClearRows(); // Implement row clearing
-            spawnNewBlock();    // Implement block spawning
+            checkAndClearRows(); 
+            spawnNewBlock(); 
         } else {
             activeBlockPosition = newPosition;
         }
@@ -676,7 +666,6 @@ void updateBlockFall(float currentTime) {
     }
 }
 
-// Function to spawn a new block
 void spawnNewBlock() {
     activeBlockPosition = glm::vec3(3, 13, 3);
     if (background[activeBlockPosition.y][activeBlockPosition.x][activeBlockPosition.z]) {
@@ -684,7 +673,6 @@ void spawnNewBlock() {
     }
 }
 
-// Function to check and clear rows
 void checkAndClearRows() {
     for (int y = 2; y < GRID_SIZE; y++) { // sonra ayarla 
         bool fullRow = true;
@@ -717,14 +705,11 @@ void checkAndClearRows() {
                     }
                 }
             }
-            
-            // background.erase(background.begin() + y  );
-            // background.push_back(std::vector<std::vector<int>>(GRID_SIZE, std::vector<int>(GRID_SIZE, 0)));
+
         }
     }
 }
 
-// for text rendering 
 float textDisplayTime = 0.0f; 
 std::string activeText = "";  
 glm::vec3 textColor(1.0f, 0, 0); 
@@ -772,7 +757,7 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
             case GLFW_KEY_S: 
                 activeText = "S";
                 textDisplayTime = glfwGetTime() + textDurationTime; 
-                gameCont = true; // Start the game when 'S' is pressed
+                gameCont = true; 
                 fallSpeed = std::max(0.1f, fallSpeed - 0.2f); 
                 break;
             case GLFW_KEY_W: 
@@ -800,7 +785,7 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
                     activeText = "K";
                     textDisplayTime = glfwGetTime() + textDurationTime; 
                     targetCameraAngle = 90; 
-                    std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
+                    // std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
 
                     isRotating = true;
                     currentRotationTime = 0.0f;
@@ -844,8 +829,6 @@ void display() {
 
     glm::mat4 blockModelMatrix;
     
-    drawingGround = true;
-
     // bura zemini ciziyo
     for(int x = 0; x < GRID_SIZE; x++){
         for(int z = 0; z < GRID_SIZE ; z++){
@@ -861,28 +844,27 @@ void display() {
         }
     } 
     
-    drawingGround = false;
     for (int i=0;i<2;i++) {
         glUniform3fv(kdLoc[i], 1, glm::value_ptr(kdCubes));
     }
     // drawBlocks();
     for(int x = 0; x < 3; x++){
-            for(int y = 0; y < 3 ; y++){
-                for(int z = 0; z < 3 ; z++){
-                    blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x-4.5, y, z-4.5) ) * BLOCK_SIZE);
-                    // std::cout << activeBlockPosition.x << std::endl;
-                    glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
-                    drawCubeEdges(blockModelMatrix);
-                    drawCube();
-                }
+        for(int y = 0; y < 3 ; y++){
+            for(int z = 0; z < 3 ; z++){
+                blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition + glm::vec3(x-4.5, y, z-4.5) ) * BLOCK_SIZE);
+                // std::cout << activeBlockPosition.x << std::endl;
+                glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+                drawCubeEdges(blockModelMatrix);
+                drawCube();
             }
-        } 
+        }
+    } 
 
-    //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+    // glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
     // drawCube();
-    //glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition ));
-    //blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
-    //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
+    // glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition ));
+    // blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
+    // glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
     if (cameraAngle == 0) renderText("Front", 30, 950, 0.50, glm::vec3(0, 1, 1));
     else if (cameraAngle == 90) renderText("Right", 30, 950, 0.50, glm::vec3(0, 1, 1));
     else if (cameraAngle == -90 || cameraAngle == 270 ) renderText("Left", 30, 950, 0.50, glm::vec3(0, 1, 1));
@@ -902,8 +884,6 @@ void mainLoop(GLFWwindow* window) {
         lastTime = currentTime;
 
         rotateEyePosition(deltaTime);
-        // Smoothly interpolatebackground camera angle
-        // cameraAngle = glm::mix(cameraAngle, targetCameraAngle, 0.1f);
 
         updateBlockFall(currentTime);
         display();
