@@ -761,8 +761,8 @@ void display() {
     // drawCubeEdges();
     
     if (gameOver) {
-        renderText("Game Over!", gWidth / 2 - 200, gHeight / 2, 1.5, glm::vec3(0.92, 0.20, 0.63));
-        renderText("Score " + std::to_string(score), gWidth / 2 - 100, gHeight / 2 - 50, 1.0, glm::vec3(0.51, 0.20, 0.92));
+        renderText("Game Over!", 100, 500, 1.5, glm::vec3(0.92, 0.20, 0.63));
+        renderText("Score " + std::to_string(score), 200, 450, 1.0, glm::vec3(0.51, 0.20, 0.92));
         // return; 
     }
     
@@ -814,11 +814,13 @@ void display() {
     //glm::mat4 blockModelMatrix = glm::translate(glm::mat4(1.0f), (activeBlockPosition ));
     //blockModelMatrix = glm::scale(blockModelMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
     //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
-    if (cameraAngle == 0) renderText("Front", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
-    else if (cameraAngle == 90) renderText("Right", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
-    else if (cameraAngle == -90) renderText("Left", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
-    else if (cameraAngle == 180) renderText("Back", 30, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
-    renderText("Point: " + std::to_string(score), gWidth - 150, gHeight - 50, 0.50, glm::vec3(0, 1, 1));
+    if (cameraAngle == 0) renderText("Front", 30, 950, 0.50, glm::vec3(0, 1, 1));
+    else if (cameraAngle == 90) renderText("Right", 30, 950, 0.50, glm::vec3(0, 1, 1));
+    else if (cameraAngle == -90) renderText("Left", 30, 950, 0.50, glm::vec3(0, 1, 1));
+    else if (cameraAngle == 180) renderText("Back", 30, 950, 0.50, glm::vec3(0, 1, 1));
+    
+    if (score<100000) renderText("Point: " + std::to_string(score), 450, 950, 0.50, glm::vec3(0, 1, 1));
+    else renderText("Point: " + std::to_string(score), 400, 950, 0.50, glm::vec3(0, 1, 1));
 
 }
 
