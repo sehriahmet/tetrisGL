@@ -2,3 +2,4 @@ tetrisGL_template/.vscode/settings.json
 tetrisGL_demo.mp4
 tetrisGL_template/tetrisGL
 .vscode/settings.json
+*.tar.gz

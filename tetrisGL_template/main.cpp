@@ -659,23 +659,44 @@ void updateBlockFall(float currentTime) {
 
     if (currentTime - lastFallTime > fallSpeed) {
         glm::vec3 newPosition = activeBlockPosition + glm::vec3(0, -1, 0); 
-        if (newPosition.y < 1 || background[newPosition.y][newPosition.x][newPosition.z] || background[newPosition.y][newPosition.x + 2][newPosition.z] 
-        || background[newPosition.y][newPosition.x][newPosition.z + 2] ) {
-            for(int x = 0; x < 3; x++){
-                for(int y = 0; y < 3 ; y++){
-                    for(int z = 0; z < 3 ; z++){
-                        background[activeBlockPosition.y + y][activeBlockPosition.x + x][activeBlockPosition.z + z] = 1;
+        
+        bool collision = false;
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                for (int z = 0; z < 3; z++) {
+                    glm::vec3 blockPos = activeBlockPosition + glm::vec3(x, y, z);
+                    
+                    if (blockPos.y - 1 < 1 || background[blockPos.y-1][blockPos.x][blockPos.z]) {
+                        collision = true;
+                        break;
+                    }
+                }
+                if (collision) break;
+            }
+            if (collision) break;
+        }
+        
+        if (collision) {
+            for (int x = 0; x < 3; x++) {
+                for (int y = 0; y < 3; y++) {
+                    for (int z = 0; z < 3; z++) {
+                        glm::vec3 blockPos = activeBlockPosition + glm::vec3(x, y, z);
+                        if (blockPos.y >= 1 && blockPos.x >= 0 && blockPos.z >= 0) {
+                            background[blockPos.y][blockPos.x][blockPos.z] = 1;
+                        }
                     }
                 }
             }
             checkAndClearRows(); 
-            spawnNewBlock(); 
+            spawnNewBlock();
         } else {
             activeBlockPosition = newPosition;
         }
+        
         lastFallTime = currentTime;
     }
 }
+
 
 void spawnNewBlock() {
     
