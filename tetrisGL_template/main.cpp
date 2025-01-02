@@ -687,7 +687,8 @@ void spawnNewBlock() {
 }
 
 void checkAndClearRows() {
-    for (int y = 2; y < GRID_SIZE; y++) { // sonra ayarla 
+    int k;
+    for (int y = 1; y < GRID_SIZE; y++) { // sonra ayarla 
         bool fullRow = true;
         for (int x = 0; x < GRID_SIZE; x++) {
             for (int z = 0; z < GRID_SIZE; z++) {
@@ -697,9 +698,10 @@ void checkAndClearRows() {
                 }
             }
             if (!fullRow) break;
+            if (fullRow) k = y;
         }
         if (fullRow) {
-            for(int y=1; y<4;y++){
+            for(int y=k; y<k+3;y++){
                 for (int x=0;x<GRID_SIZE; x++) {
                     for (int z=0; z<GRID_SIZE; z++) {
                         score++;
@@ -708,7 +710,7 @@ void checkAndClearRows() {
                 }
             }
 
-            for(int y=4; y<13;y++){
+            for(int y=k+3; y<13;y++){
                 for (int x=0;x<GRID_SIZE; x++) {
                     for (int z=0; z<GRID_SIZE; z++) {
                         if (background[y][x][z]) {
