@@ -64,6 +64,13 @@ bool drawingGround = false;
 glm::vec3 kdGround(0.334, 0.288, 0.635); // this is the ground color in the demo
 glm::vec3 kdCubes(0.86, 0.11, 0.31);
 
+
+
+bool isRotating = false; 
+float currentRotationTime = 0.0f; 
+const float rotationDuration = 1.0f; // bura hizlandirilabilir. 
+
+
 int activeProgramIndex = 0;
 
 // Holds all state information relevant to a character as loaded using FreeType
@@ -549,19 +556,53 @@ void reshape(GLFWwindow* window, int w, int h) {
     }
 }
 
-void rotateEyePosition() {
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(targetCameraAngle), glm::vec3(0, 1.0f, 0));
+void rotateEyePosition(float deltaTime) {
+    if (!isRotating) return;
+
+    currentRotationTime += deltaTime;
+
+    float t = glm::clamp(currentRotationTime / rotationDuration, 0.0f, 1.0f);
+
+    // float currentAngle = glm::mix(cameraAngle, targetCameraAngle, t);
+
+    float currentAngle = 0 + (t * targetCameraAngle);
+
+    // currentAngle +=cameraAngle;
+
+    // std::cout<<  " cameraAngle:  " <<cameraAngle << " targetCameraAngle:  " << targetCameraAngle <<" currentangle: " <<currentAngle << std::endl;
+
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(currentAngle), glm::vec3(0, 1.0f, 0));
     glm::vec3 rotatedEyePos = glm::vec3(rotationMatrix * glm::vec4(eyePos, 1.0f));
     viewingMatrix = glm::lookAt(rotatedEyePos, glm::vec3(0, 4.5, 0), glm::vec3(0, 1, 0));
-    eyePos = rotatedEyePos;
+    
 
     for (int i = 0; i < 2; ++i) {
         glUseProgram(gProgram[i]);
         lightPosLoc[i] = glGetUniformLocation(gProgram[i], "lightPos");
-        glUniform3fv(lightPosLoc[i], 1, glm::value_ptr(eyePos));
+        glUniform3fv(lightPosLoc[i], 1, glm::value_ptr(rotatedEyePos));
         glUniformMatrix4fv(viewingMatrixLoc[i], 1, GL_FALSE, glm::value_ptr(viewingMatrix));
     }
 
+    if (t >= 1.0f) {
+        isRotating = false;
+        currentRotationTime = 0.0f; // Reset for next rotation
+        eyePos = rotatedEyePos;
+        // startCameraAngle = targetCameraAngle; // Set new start angle
+
+        if (cameraAngle == -90 || cameraAngle == 270 && targetCameraAngle == -90) { cameraAngle = 180.0f; }
+        else if (cameraAngle == 0 && targetCameraAngle == -90) cameraAngle = 270.0f;
+        else if (cameraAngle == 90 && targetCameraAngle == -90) cameraAngle = 0.0f;
+        else if (cameraAngle == 180 && targetCameraAngle == -90) cameraAngle = 90.0f;
+        
+
+        else if (cameraAngle == -90 || cameraAngle == 270 && targetCameraAngle == 90) { cameraAngle = 0.0f; }
+        else if (cameraAngle == 0 && targetCameraAngle == 90) cameraAngle = 90.0f;
+        else if (cameraAngle == 90 && targetCameraAngle == 90) cameraAngle = 180.0f;
+        else if (cameraAngle == 180 && targetCameraAngle == 90) cameraAngle = 270.0f;
+        targetCameraAngle =0;
+        // std::cout<<"after camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<"\n"<<std::endl;
+        // std::cout<<"eyepos.x:  "<<eyePos.x<<"  eyePos.z:  "<<eyePos.z<<"\n"<<std::endl;
+    }
 }
 
 
@@ -683,6 +724,15 @@ void checkAndClearRows() {
     }
 }
 
+// for text rendering 
+float textDisplayTime = 0.0f; 
+std::string activeText = "";  
+glm::vec3 textColor(1.0f, 0, 0); 
+float textSize = 0.7f; 
+float textX = 30.0f; 
+float textY = 900.0f; 
+float textDurationTime = 0.5f;
+
 // Updated keyboard handling function
 void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if ((key == GLFW_KEY_Q || key == GLFW_KEY_ESCAPE) && action == GLFW_PRESS)
@@ -696,19 +746,23 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
         switch (key) {
             case GLFW_KEY_A: 
+                activeText = "A";
+                textDisplayTime = glfwGetTime() + textDurationTime; 
                 
                 if (cameraAngle==0) moveBlock(-1, 0); 
                 else if (cameraAngle==90) moveBlock(0,1);
-                else if (cameraAngle==-90) moveBlock(0,-1);
+                else if (cameraAngle==-90 || cameraAngle == 270) moveBlock(0,-1);
                 else if (cameraAngle==180) moveBlock(1,0);
 
                 
                 break;
 
             case GLFW_KEY_D: 
+                activeText = "D";
+                textDisplayTime = glfwGetTime() + textDurationTime; 
                 if (cameraAngle==0) moveBlock(1, 0); 
                 else if (cameraAngle==90) moveBlock(0,-1);
-                else if (cameraAngle==-90) moveBlock(0,1);
+                else if (cameraAngle==-90 || cameraAngle == 270) moveBlock(0,1);
                 else if (cameraAngle==180) moveBlock(-1,0);
                 
                 
@@ -716,35 +770,46 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
                 break;
 
             case GLFW_KEY_S: 
+                activeText = "S";
+                textDisplayTime = glfwGetTime() + textDurationTime; 
                 gameCont = true; // Start the game when 'S' is pressed
                 fallSpeed = std::max(0.1f, fallSpeed - 0.2f); 
                 break;
             case GLFW_KEY_W: 
+                activeText = "W";
+                textDisplayTime = glfwGetTime() + textDurationTime; 
                 fallSpeed = std::min(1.1f, fallSpeed + 0.2f); 
                 if (fallSpeed == 1.1f) gameCont = false;
                 break;
             case GLFW_KEY_H: 
-                renderText("H", 30.0f, 50.0f, 1, glm::vec3(1.0f, 0, 0)); // bunun sabiot durmasi lazim 
+                if (!isRotating) {
+                    activeText = "H";
+                    textDisplayTime = glfwGetTime() + textDurationTime; 
 
-                targetCameraAngle = -90; 
-                std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
-                rotateEyePosition();
-                if (cameraAngle == -90) { cameraAngle = 180.0f; }
-                else if (cameraAngle == 0) cameraAngle = -90.0f;
-                else if (cameraAngle == 90) cameraAngle = 0.0f;
-                else if (cameraAngle == 180) cameraAngle = 90.0f;
-                std::cout<<"after camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<"\n"<<std::endl;
+                    isRotating = true;
+                    currentRotationTime = 0.0f;
+                    targetCameraAngle = -90; 
+                    // std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
+                    // rotateEyePosition();
+                    
+                }
+
                 break;
             case GLFW_KEY_K: 
-                renderText("K", 30.0f, 50.0f,1.5, glm::vec3(1.0f, 0, 0)); // bunun da sabit durmasi lazim 
-                targetCameraAngle = 90; 
-                std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
-                rotateEyePosition();
-                if (cameraAngle == -90) { cameraAngle = 0.0f; }
-                else if (cameraAngle == 0) cameraAngle = 90.0f;
-                else if (cameraAngle == 90) cameraAngle = 180.0f;
-                else if (cameraAngle == 180) cameraAngle = -90.0f;
-                std::cout<<"after camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<"\n"<<std::endl;
+                if (!isRotating) {
+                    activeText = "K";
+                    textDisplayTime = glfwGetTime() + textDurationTime; 
+                    targetCameraAngle = 90; 
+                    std::cout<<"before camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<std::endl;
+
+                    isRotating = true;
+                    currentRotationTime = 0.0f;
+
+                    // rotateEyePosition();
+                    
+                    // std::cout<<"after camera angle: "<<cameraAngle<<"  targetcameraangle:  "<<targetCameraAngle<<"\n"<<std::endl;
+                }
+
                 break;
         }
     }
@@ -768,6 +833,10 @@ void display() {
     
     // bura yerdeki bloklari ciziyo
     drawBlocks();
+
+    if (glfwGetTime() < textDisplayTime) {
+        renderText(activeText, textX, textY, textSize, textColor);
+    }
 
     // drawCube();
     // drawBlocks();
@@ -816,7 +885,7 @@ void display() {
     //glUniformMatrix4fv(modelingMatrixLoc[0], 1, GL_FALSE, glm::value_ptr(blockModelMatrix));
     if (cameraAngle == 0) renderText("Front", 30, 950, 0.50, glm::vec3(0, 1, 1));
     else if (cameraAngle == 90) renderText("Right", 30, 950, 0.50, glm::vec3(0, 1, 1));
-    else if (cameraAngle == -90) renderText("Left", 30, 950, 0.50, glm::vec3(0, 1, 1));
+    else if (cameraAngle == -90 || cameraAngle == 270 ) renderText("Left", 30, 950, 0.50, glm::vec3(0, 1, 1));
     else if (cameraAngle == 180) renderText("Back", 30, 950, 0.50, glm::vec3(0, 1, 1));
     
     if (score<100000) renderText("Point: " + std::to_string(score), 450, 950, 0.50, glm::vec3(0, 1, 1));
@@ -825,9 +894,14 @@ void display() {
 }
 
 void mainLoop(GLFWwindow* window) {
+    float lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
         float currentTime = glfwGetTime();
 
+        float deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
+        rotateEyePosition(deltaTime);
         // Smoothly interpolatebackground camera angle
         // cameraAngle = glm::mix(cameraAngle, targetCameraAngle, 0.1f);
 
